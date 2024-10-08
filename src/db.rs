@@ -1,7 +1,10 @@
 use crate::error::MyError;
-use crate::response::{FeedbackData, FeedbackListResponse, FeedbackResponse, SingleFeedbackResponse};
+use crate::response::{
+    FeedbackData, FeedbackListResponse, FeedbackResponse, SingleFeedbackResponse,
+};
 use crate::{
-    error::MyError::*, model::FeedbackModel, schema::CreateFeedbackSchema, schema::UpdateFeedbackSchema,
+    error::MyError::*, model::FeedbackModel, schema::CreateFeedbackSchema,
+    schema::UpdateFeedbackSchema,
 };
 use chrono::prelude::*;
 use futures::StreamExt;
@@ -46,7 +49,9 @@ impl DB {
     pub async fn fetch_feedbacks(&self, limit: i64, page: i64) -> Result<FeedbackListResponse> {
         let mut cursor = self
             .feedback_collection
-            .find(doc! {}).limit(limit).skip(u64::try_from((page - 1) * limit).unwrap())
+            .find(doc! {})
+            .limit(limit)
+            .skip(u64::try_from((page - 1) * limit).unwrap())
             .await
             .map_err(MongoQueryError)?;
 
@@ -62,14 +67,17 @@ impl DB {
         })
     }
 
-    pub async fn create_feedback(&self, body: &CreateFeedbackSchema) -> Result<SingleFeedbackResponse> {
-        let status = body.status.to_owned().unwrap_or(false);
+    pub async fn create_feedback(
+        &self,
+        body: &CreateFeedbackSchema,
+    ) -> Result<SingleFeedbackResponse> {
+        let status = body.status.to_owned().unwrap_or(String::from("pending"));
 
         let document = self.create_feedback_document(body, status)?;
 
         let options = IndexOptions::builder().unique(true).build();
         let index = IndexModel::builder()
-            .keys(doc! {"title": 1})
+            .keys(doc! {"feedback": 1})
             .options(options)
             .build();
 
@@ -134,7 +142,11 @@ impl DB {
         }
     }
 
-    pub async fn edit_feedback(&self, id: &str, body: &UpdateFeedbackSchema) -> Result<SingleFeedbackResponse> {
+    pub async fn edit_feedback(
+        &self,
+        id: &str,
+        body: &UpdateFeedbackSchema,
+    ) -> Result<SingleFeedbackResponse> {
         let oid = ObjectId::from_str(id).map_err(|_| InvalidIDError(id.to_owned()))?;
 
         let update = doc! {
@@ -192,7 +204,7 @@ impl DB {
     fn create_feedback_document(
         &self,
         body: &CreateFeedbackSchema,
-        status: bool,
+        status: String,
     ) -> Result<bson::Document> {
         let serialized_data = bson::to_bson(body).map_err(MongoSerializeBsonError)?;
         let document = serialized_data.as_document().unwrap();

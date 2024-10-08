@@ -6,10 +6,10 @@ pub struct FilterOptions {
     pub limit: Option<usize>,
 }
 
-#[derive(Deserialize, Debug)]
-pub struct ParamOptions {
-    pub id: String,
-}
+// #[derive(Deserialize, Debug)]
+// pub struct ParamOptions {
+//     pub id: String,
+// }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateFeedbackSchema {
@@ -18,7 +18,7 @@ pub struct CreateFeedbackSchema {
     pub feedback: String,
     pub rating: i32,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub status: Option<bool>,
+    pub status: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -27,5 +27,6 @@ pub struct UpdateFeedbackSchema {
     pub email: Option<String>,
     pub feedback: Option<String>,
     pub rating: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<String>,
 }
