@@ -9,7 +9,7 @@ use crate::{
 use chrono::prelude::*;
 use futures::StreamExt;
 use mongodb::bson::{doc, oid::ObjectId, Document};
-use mongodb::options::IndexOptions;
+use mongodb::options::{IndexOptions, ReturnDocument};
 use mongodb::{bson, options::ClientOptions, Client, Collection, IndexModel};
 use std::str::FromStr;
 
@@ -71,7 +71,7 @@ impl DB {
         &self,
         body: &CreateFeedbackSchema,
     ) -> Result<SingleFeedbackResponse> {
-        let status = body.status.to_owned().unwrap_or(String::from("pending"));
+        let status = String::from("pending");
 
         let document = self.create_feedback_document(body, status)?;
 
@@ -156,6 +156,7 @@ impl DB {
         if let Some(doc) = self
             .feedback_collection
             .find_one_and_update(doc! {"_id": oid}, update)
+            .return_document(ReturnDocument::After)
             .await
             .map_err(MongoQueryError)?
         {
@@ -212,10 +213,9 @@ impl DB {
         let datetime = Utc::now();
 
         let mut doc_with_dates = doc! {
-            "createdAt": datetime,
-            "updatedAt": datetime,
-            "status": status,
-        };
+        "createdAt": datetime,
+        "updatedAt": datetime,
+        "status": status        };
         doc_with_dates.extend(document.clone());
 
         Ok(doc_with_dates)

@@ -10,8 +10,8 @@ pub struct FeedbackModel {
     pub name: String,
     pub email: String,
     pub feedback: String,
-    pub rating: i32,
-    pub status: Option<String>,
+    pub rating: f32,
+    pub status: String,
     #[serde(with = "bson::serde_helpers::chrono_datetime_as_bson_datetime")]
     pub createdAt: DateTime<Utc>,
     #[serde(with = "bson::serde_helpers::chrono_datetime_as_bson_datetime")]

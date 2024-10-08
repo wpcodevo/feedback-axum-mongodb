@@ -14,8 +14,8 @@ pub struct FeedbackResponse {
     pub name: String,
     pub email: String,
     pub feedback: String,
-    pub rating: i32,
-    pub status: Option<String>,
+    pub rating: f32,
+    pub status: String,
     pub createdAt: DateTime<Utc>,
     pub updatedAt: DateTime<Utc>,
 }
